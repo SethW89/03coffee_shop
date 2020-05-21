@@ -155,7 +155,7 @@ def update_drink_recipe(payload, drink_id):
         print(sel)
         sel.update()
     except:
-        abort(400)
+        abort(422)
     print('025')
     select = Drink.query.get(drink_id)
     print(select)
@@ -177,13 +177,31 @@ def update_drink_recipe(payload, drink_id):
 '''
 
 
+@app.route('/drinks/<int:drink_id>', methods=['DELETE'])
+@requires_auth('delete:drinks')
+def delete_drink(payload, drink_id):
+    print('Deleteing drinks!')
+    sel = Drink.query.get(drink_id)
+    if sel is None:
+        abort(404)
+    try:
+        sel.delete()
+
+        return jsonify({
+            'success': True,
+            'delete': drink_id
+        })
+    except:
+        abort(422)
+
+
 # Error Handling
 '''
 Example error handling for unprocessable entity
 '''
 
 
-@ app.errorhandler(422)
+@app.errorhandler(422)
 def unprocessable(error):
     return jsonify({
         "success": False,
@@ -209,7 +227,16 @@ def unprocessable(error):
 '''
 
 
-@ app.errorhandler(400)
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }), 404
+
+
+@app.errorhandler(400)
 def bad_request(error):
     return jsonify({
         "success": False,
@@ -218,7 +245,7 @@ def bad_request(error):
     }), 400
 
 
-@ app.errorhandler(401)
+@app.errorhandler(401)
 def unauthorized(error):
     return jsonify({
         "success": False,
@@ -227,13 +254,13 @@ def unauthorized(error):
     }), 401
 
 
-@ app.errorhandler(403)
+@app.errorhandler(AuthError)
 def forbidden(error):
     return jsonify({
         "success": False,
-        "error": 403,
-        "message": "forbidden"
-    }), 403
+        "error": error.status_code,
+        "message": error.error['code'],
+    }), error.status_code
 
 
 '''
