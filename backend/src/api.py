@@ -34,13 +34,8 @@ print('DB has been reset.')
 
 @app.route('/drinks')
 def get_drinks():
-    print('Here be drinks!')
     sel = Drink.query.all()
-    print('010')
     drinks = [drink.short() for drink in sel]
-    print('011')
-    print(drinks)
-    print('012')
     return jsonify({
         'success': True,
         'drinks': drinks
@@ -60,9 +55,7 @@ def get_drinks():
 @app.route('/drinks-detail')
 @requires_auth('get:drinks-detail')
 def drinks_detail(payload):
-    print('You made it into drinks_detail()!')
     sel = Drink.query.all()
-    print(sel)
     drinks = [drink.long() for drink in sel]
     return jsonify({
         'success': True,
@@ -98,10 +91,7 @@ def create_drink(payload):  # Why do we need payload?
 
     sel = Drink.query.filter_by(title=new_title).all()
     drink = [d.long() for d in sel]
-    print(drink)
-    print('000')
-    print(sel)
-    print('001')
+
     return jsonify({
         'success': True,
         'drinks': drink
@@ -129,36 +119,19 @@ def update_drink_recipe(payload, drink_id):
 
     if sel is None:
         abort(404)
-    print(sel)
     sel.title = body.get('title', sel.title)
-    print("Hello there.")
-    print('020')
-    print(sel)
-    print('021')
-    print(sel.title)
-    print('022')
-    print(sel.recipe)
-    print('023')
-    #sel.recipe = []
-    print('024')
     recipe = json.dumps(body.get('recipe'))
-    print(recipe)
+
     if 'recipe' not in body:
         # if recipe is False:
-        print('030')
         sel.recipe = sel.recipe
     else:
-        print('040')
         sel.recipe = recipe
     try:
-        print('050')
-        print(sel)
         sel.update()
     except:
         abort(422)
-    print('025')
     select = Drink.query.get(drink_id)
-    print(select)
     return jsonify({
         'success': True,
         'drinks': sel.long()
@@ -180,7 +153,6 @@ def update_drink_recipe(payload, drink_id):
 @app.route('/drinks/<int:drink_id>', methods=['DELETE'])
 @requires_auth('delete:drinks')
 def delete_drink(payload, drink_id):
-    print('Deleteing drinks!')
     sel = Drink.query.get(drink_id)
     if sel is None:
         abort(404)
